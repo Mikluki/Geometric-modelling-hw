@@ -49,24 +49,7 @@ points = []
 p1 = np.matrix([-1, -1, 1])
 p2 = np.matrix([1, -1, 1])
 
-# # all the cube vertices
-# points.append(np.matrix([-1, -1, 1]))
-# points.append(np.matrix([1, -1, 1]))
-# points.append(np.matrix([1,  1, 1]))
-# points.append(np.matrix([-1, 1, 1]))
-# points.append(np.matrix([-1, -1, -1]))
-# points.append(np.matrix([1, -1, -1]))
-# points.append(np.matrix([1, 1, -1]))
-# points.append(np.matrix([-1, 1, -1]))
-
 # ============= Matrices ==================
-
-
-# rotation_y = np.matrix([
-#     [np.cos(angle), 0, np.sin(angle)],
-#     [0, 1, 0],
-#     [-np.sin(angle), 0, np.cos(angle)],
-# ])
 
 # matrix = np.matrix([
 #     [1, 0, 0],
@@ -74,25 +57,46 @@ p2 = np.matrix([1, -1, 1])
 #     [0, 0, 1]])
 
 projection_matrix = np.matrix([
-    [1, 0, 0],
-    [0, 1, 0]
+    [1, 0, 0, 0],
+    [0, 1, 0, 0]
 ])
 
 
-def rotation_matrix(angle):
-    rotation_matrix = np.matrix([
-        [np.cos(angle), -np.sin(angle), 0],
-        [np.sin(angle), np.cos(angle), 0],
-        [0, 0, 1]])
+def Rx(angle):
+    Rx = np.matrix([
+        [1,             0,              0, 0],
+        [0, np.cos(angle), -np.sin(angle), 0],
+        [0, np.sin(angle),  np.cos(angle), 0],
+        [0,             0,              0, 1]])
 
-    return rotation_matrix
+    return Rx
 
 
-def translation_matrix(tx, ty):
+def Ry(angle):
+    Ry = np.matrix([
+        [np.cos(angle), 0,  np.sin(angle), 0],
+        [0,             1,              0, 0],
+        [0,-np.sin(angle),  np.cos(angle), 0],
+        [0,             0,              0, 1]])
+
+    return Ry
+
+
+def Rz(angle):
+    Rz = np.matrix([
+        [0, np.cos(angle), -np.sin(angle), 0],
+        [0, np.sin(angle),  np.cos(angle), 0],
+        [0,             0,              1, 0],
+        [0,             0,              0, 1]])
+
+    return Rz
+
+def translation_matrix(tx, ty,tz):
     translation_matrix = np.matrix([
-        [1, 0, tx],
-        [0, 1, ty],
-        [0, 0, 1]])
+        [1, 0, 0, tx],
+        [0, 1, 0, ty],
+        [0, 0, 1, tz],
+        [0, 0, 0, 1]])
     return translation_matrix
 
 # ============= Functions ==================
@@ -213,20 +217,26 @@ if __name__ == '__main__':
         w.rotate(rotation)
 
         w.draw()
-        #print(f"Direction = {direction}")
-        if direction == 0:
-            translation = (-0.2,0)
-            rotation = - 0.001
-        if direction == 1:
-            translation = (0.2,0)
-            rotation =  0.001
-        if direction == 2:
-            translation = (0,-0.2)
-            rotation = 0
-        if direction == 3:
-            translation = (0.0,0.2)
-            rotation = 0
-
 
 
         pygame.display.update()
+
+
+
+
+
+
+
+
+        # if direction == 0:
+        #     translation = (-0.2,0)
+        #     rotation = - 0.001
+        # if direction == 1:
+        #     translation = (0.2,0)
+        #     rotation =  0.001
+        # if direction == 2:
+        #     translation = (0,-0.2)
+        #     rotation = 0
+        # if direction == 3:
+        #     translation = (0.0,0.2)
+        #     rotation = 0
