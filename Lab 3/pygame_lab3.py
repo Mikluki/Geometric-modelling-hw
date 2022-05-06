@@ -74,10 +74,10 @@ def get_matrix_Rx(angle):
 
 def get_matrix_Ry(angle):
     ry = np.matrix([
-        [np.cos(angle),             0,  np.sin(angle), 0],
-        [0            ,             1,              0, 0],
-        [-np.sin(angle),            0,  np.cos(angle), 0],
-        [0            ,             0,              0, 1]])
+        [np.cos(angle) , 0,  np.sin(angle), 0],
+        [0             , 1,              0, 0],
+        [-np.sin(angle), 0,  np.cos(angle), 0],
+        [0             , 0,              0, 1]])
 
     return ry
 
