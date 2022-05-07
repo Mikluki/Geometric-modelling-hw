@@ -84,8 +84,8 @@ def get_matrix_Ry(angle):
 
 def get_matrix_Rz(angle):
     rz = np.matrix([
-        [0, np.cos(angle), -np.sin(angle), 0],
-        [0, np.sin(angle),  np.cos(angle), 0],
+        [np.cos(angle), -np.sin(angle), 0, 0],
+        [np.sin(angle),  np.cos(angle), 0, 0],
         [0,             0,              1, 0],
         [0,             0,              0, 1]])
 
@@ -250,8 +250,8 @@ if __name__ == '__main__':
         # update stuff
         # w.translate(*translation)
         w.rotate_x(0.001)
-        w.rotate_y(0.002)
-        # w.rotate_z(0.001)
+        w.rotate_y(0.001)
+        w.rotate_z(0.001)
 
 
         w.draw()
