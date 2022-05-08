@@ -258,7 +258,7 @@ if __name__ == '__main__':
         # print('transform1\n', w.center.vec == w.top.vec)
         # w.translate(5, 5, 0)
         w.rotate_x(0.001)
-        # w.rotate_y(0.001)
+        w.rotate_y(0.001)
         w.rotate_z(0.001)
 
         # print('transform2\n', w.center.vec == w.top.vec)
