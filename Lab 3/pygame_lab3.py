@@ -123,20 +123,23 @@ class Point():
         self.vec = matrix @ self.vec
         self.x = self.vec[0, 0]
         self.y = self.vec[1, 0]
-        if len(self.vec) >= 3:
-            self.z = self.vec[2, 0]
+        self.z = self.vec[2, 0]
 
         return self
 
 # print(Rz(np.pi/2)@a.vec)
 class Wheel:
-    def __init__(self, radius, x=0, y=0, z=0, color='black'):
+    def __init__(self, radius, height=0, x=0, y=0, z=0, color='black'):
 
         self.radius = radius
+        self.height = height
+
         self.diag_coef = radius/np.sqrt(2)
         self.color = color
 
         self.center = Point(x, y, z)
+        self.top = Point(x, y, height)
+
         self.cirle_points = []
         self.cirle_points.append( Point(self.center.x, self.center.y + self.radius, self.center.z ))
         self.cirle_points.append( Point(self.center.x + self.diag_coef, self.center.y + self.diag_coef,\
@@ -152,6 +155,7 @@ class Wheel:
             self.center.z))
 
         self.points = list(self.cirle_points)
+        self.points.append(self.top)
         self.points.append(self.center)
 
 
@@ -159,6 +163,7 @@ class Wheel:
         for i in range(len(self.points)):
             self.points[i].vecprod(get_matrix_Tr(-self.center.x, -self.center.y, -self.center.z))
         return self
+
 
     def translate(self, tx, ty, tz):
         for i in range(len(self.points)):
@@ -204,6 +209,7 @@ class Wheel:
         for i in range(len(self.cirle_points)):
             drawline(self.points[i], (self.points[(i+1) % len(self.cirle_points)]))
             drawline(self.points[i], (self.center))
+            drawline(self.points[i], (self.top))
 
 
 
@@ -237,6 +243,7 @@ if __name__ == '__main__':
     w = Wheel(100, x=screen_center[0], y=screen_center[1])
 
     while True:
+        # clock.tick(5)
         screen.blit(bg, (0,0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -248,12 +255,16 @@ if __name__ == '__main__':
                     exit()
 
         # update stuff
-        # w.translate(*translation)
+        print('transform1\n', w.center.vec == w.top.vec)
+        # w.translate(5, 5, 0)
         w.rotate_x(0.001)
-        w.rotate_y(0.001)
+        # w.rotate_y(0.001)
         w.rotate_z(0.001)
 
+        # print('transform2\n', w.center.vec == w.top.vec)
+        # w.translate_2_origin()
 
+        print('draw\n',w.center.vec == w.top.vec, '\n\n')
         w.draw()
 
 
