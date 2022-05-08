@@ -158,10 +158,10 @@ class Wheel:
         self.points.append(self.top)
         self.points.append(self.center)
 
-
     def translate_2_origin(self,):
+        cx, cy, cz = self.center.x, self.center.y, self.center.z
         for i in range(len(self.points)):
-            self.points[i].vecprod(get_matrix_Tr(-self.center.x, -self.center.y, -self.center.z))
+            self.points[i].vecprod(get_matrix_Tr(-cx, -cy, -cz))
         return self
 
 
@@ -240,7 +240,7 @@ if __name__ == '__main__':
     screen.blit(bg, (0,0))
 
     # ============= Create object ==================
-    w = Wheel(100, x=screen_center[0], y=screen_center[1])
+    w = Wheel(100, height=200, x=screen_center[0], y=screen_center[1])
 
     while True:
         # clock.tick(5)
@@ -255,7 +255,7 @@ if __name__ == '__main__':
                     exit()
 
         # update stuff
-        print('transform1\n', w.center.vec == w.top.vec)
+        # print('transform1\n', w.center.vec == w.top.vec)
         # w.translate(5, 5, 0)
         w.rotate_x(0.001)
         # w.rotate_y(0.001)
@@ -264,7 +264,7 @@ if __name__ == '__main__':
         # print('transform2\n', w.center.vec == w.top.vec)
         # w.translate_2_origin()
 
-        print('draw\n',w.center.vec == w.top.vec, '\n\n')
+        # print('draw\n',w.center.vec == w.top.vec, '\n\n')
         w.draw()
 
 
