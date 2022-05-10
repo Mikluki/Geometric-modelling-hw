@@ -46,24 +46,24 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
 points = []
-p1 = np.matrix([-1, -1, 1])
-p2 = np.matrix([1, -1, 1])
+p1 = np.array([-1, -1, 1])
+p2 = np.array([1, -1, 1])
 
 # ============= Matrices ==================
 
-# matrix = np.matrix([
+# matrix = np.array([
 #     [1, 0, 0],
 #     [0, 1, 0],
 #     [0, 0, 1]])
 
-projection_matrix = np.matrix([
+projection_matrix = np.array([
     [1, 0, 0, 0],
     [0, 1, 0, 0]
 ])
 
 
 def get_matrix_Rx(angle):
-    rx = np.matrix([
+    rx = np.array([
         [1,             0,              0, 0],
         [0, np.cos(angle), -np.sin(angle), 0],
         [0, np.sin(angle),  np.cos(angle), 0],
@@ -73,7 +73,7 @@ def get_matrix_Rx(angle):
 
 
 def get_matrix_Ry(angle):
-    ry = np.matrix([
+    ry = np.array([
         [np.cos(angle) , 0,  np.sin(angle), 0],
         [0             , 1,              0, 0],
         [-np.sin(angle), 0,  np.cos(angle), 0],
@@ -83,7 +83,7 @@ def get_matrix_Ry(angle):
 
 
 def get_matrix_Rz(angle):
-    rz = np.matrix([
+    rz = np.array([
         [np.cos(angle), -np.sin(angle), 0, 0],
         [np.sin(angle),  np.cos(angle), 0, 0],
         [0,             0,              1, 0],
@@ -93,7 +93,7 @@ def get_matrix_Rz(angle):
 
 
 def get_matrix_Tr(tx, ty, tz):
-    translation_matrix = np.matrix([
+    translation_matrix = np.array([
         [1, 0, 0, tx],
         [0, 1, 0, ty],
         [0, 0, 1, tz],
@@ -111,7 +111,7 @@ def drawline(point1, point2):
 # ============= Classes ==================
 class Point():
     def __init__(self, x, y, z):
-        self.vec = np.matrix([[x], [y], [z], [1]])
+        self.vec = np.array([[x], [y], [z], [1]])
         self.x = self.vec[0, 0]
         self.y = self.vec[1, 0]
         self.z = self.vec[2, 0]
@@ -125,7 +125,7 @@ class Point():
         self.y = self.vec[1, 0]
         self.z = self.vec[2, 0]
 
-        return self
+        return True
 
 # print(Rz(np.pi/2)@a.vec)
 class Wheel:
@@ -162,13 +162,13 @@ class Wheel:
         cx, cy, cz = self.center.x, self.center.y, self.center.z
         for i in range(len(self.points)):
             self.points[i].vecprod(get_matrix_Tr(-cx, -cy, -cz))
-        return self
+        return True
 
 
     def translate(self, tx, ty, tz):
         for i in range(len(self.points)):
             self.points[i].vecprod(get_matrix_Tr(tx, ty, tz))
-        return self
+        return True
 
 # ====================== Rotation ======================
     def rotate_x(self, angle):
@@ -177,7 +177,7 @@ class Wheel:
         for i in range(len(self.points)):
             self.points[i].vecprod(get_matrix_Rx(angle))
         self.translate(cx, cy, cz)
-        return self
+        return True
 
     def rotate_y(self, angle):
         cx, cy, cz = self.center.x, self.center.y, self.center.z
@@ -185,7 +185,7 @@ class Wheel:
         for i in range(len(self.points)):
             self.points[i].vecprod(get_matrix_Ry(angle))
         self.translate(cx, cy, cz)
-        return self
+        return True
 
     def rotate_z(self, angle):
         cx, cy, cz = self.center.x, self.center.y, self.center.z
@@ -193,7 +193,7 @@ class Wheel:
         for i in range(len(self.points)):
             self.points[i].vecprod(get_matrix_Rz(angle))
         self.translate(cx, cy, cz)
-        return self
+        return True
 
 
 # ====================== Priject and draw ======================
@@ -208,7 +208,7 @@ class Wheel:
         self.project_to_screen()
         for i in range(len(self.cirle_points)):
             drawline(self.points[i], (self.points[(i+1) % len(self.cirle_points)]))
-            drawline(self.points[i], (self.center))
+            # drawline(self.points[i], (self.center))
             drawline(self.points[i], (self.top))
 
 
