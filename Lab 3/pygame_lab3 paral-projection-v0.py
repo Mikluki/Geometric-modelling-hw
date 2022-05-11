@@ -39,7 +39,7 @@ BLACK = (0, 0, 0)
 scale = 100
 WIDTH, HEIGHT = 1000, 800
 screen_center = [WIDTH/2, HEIGHT/2]  # x, y
-
+sc_center_vec = np.array([[WIDTH/2], [HEIGHT/2]])
 pygame.display.set_caption("3D projection Lab#2")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -200,15 +200,14 @@ class Wheel:
     def project_to_screen(self):
         for i in range(len(self.points)):
             # print(self.points[i].vec, 'mult to\n', projection_matrix, '  n={}\n\n'.format(i))
-            projection2d = projection_matrix @ self.points[i].vec
+            projection2d = projection_matrix @ self.points[i].vec + sc_center_vec
         return projection2d
 
 
     def draw(self):
-        self.project_to_screen()
+        # self.project_to_screen()
         for i in range(len(self.cirle_points)):
             drawline(self.points[i], (self.points[(i+1) % len(self.cirle_points)]))
-            # drawline(self.points[i], (self.center))
             drawline(self.points[i], (self.top))
 
 
@@ -240,7 +239,7 @@ if __name__ == '__main__':
     screen.blit(bg, (0,0))
 
     # ============= Create object ==================
-    w = Wheel(100, height=200, x=screen_center[0], y=screen_center[1])
+    w = Wheel(100, height=200, x=0, y=0)
 
     while True:
         # clock.tick(5)

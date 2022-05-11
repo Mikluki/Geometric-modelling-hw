@@ -39,7 +39,7 @@ BLACK = (0, 0, 0)
 scale = 100
 WIDTH, HEIGHT = 1000, 1000
 screen_center = [WIDTH/2, HEIGHT/2]  # x, y
-screen_center_vec = np.array([[screen_center[0]], [screen_center[1]]])
+screen_center_vec = np.array([[WIDTH/2], [HEIGHT/2]])
 
 pygame.display.set_caption("3D projection Lab#2")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -139,35 +139,6 @@ def get_matrix_S():
         [ 0, 0, 0, 1]])
     return Scale_matrix
 
-
-
-class Camera:
-    def __init__(self, xe=100, ye=100, ze=100, distance = 150):
-        self.pos = (xe,ye,ze)
-        self.v = np.sqrt(xe**2 + ye**2)
-        self.e = np.zqrt(xe**2 + ye**2 + ze**2)
-        self.cosTheta = xe/self.v
-        self.sinTheta = ye/self.v
-        self.cosPhi = ze/self.e
-        self.sinPhi = self.v/self.e
-
-        self.VRC_matrix = self.get_VRC_matrix()
-
-        self.dist = distance
-        self.proj_matrix = np.array([
-            [1, 0, 0, 0],
-            [0, 1, 0, 0]
-        ])
-
-
-    def get_VRC_matrix(self,):
-        matrix = get_matrix_RzInv(self.cosTheta, self.sinTheta) @ get_matrix_RyInv(self.cosPhi, self.sinPhi) @ \
-            get_matrix_TrInv(self.e) @ get_matrix_S()
-        return matrix
-
-        # deg = 30
-        # deg_rad = deg*np.pi/180
-        # self.player_sc_dist = WIDTH/2/np.tan(deg_rad)
 
 
 # ============= Functions ==================
@@ -273,36 +244,66 @@ class Wheel:
         return True
 
 
-# ====================== Priject and draw ======================
+# ====================== Project and draw ======================
+class Camera:
+    def __init__(self, xe=0, ye=0, ze=0, distance = 150):
+        self.pos = (xe,ye,ze)
+        self.v = np.sqrt(xe**2 + ye**2)
+        self.e = np.sqrt(xe**2 + ye**2 + ze**2)
+        self.cosTheta = xe/self.v
+        self.sinTheta = ye/self.v
+        self.cosPhi = ze/self.e
+        self.sinPhi = self.v/self.e
 
-    def project_points_to_screen(self):
-        self.center_2d = projection_matrix @ self.center.vec + screen_center_vec
-        self.top_2d = projection_matrix @ self.top.vec + screen_center_vec
+        self.vrc_matrix = self.get_VRC_matrix()
 
-        self.circle_2d = []
-        for i in range(len(self.circle_points)):
-            p_2d = projection_matrix @ self.circle_points[i].vec + \
-                screen_center_vec
-            self.circle_2d.append(p_2d)
+        self.dist = distance
+        self.proj_matrix = np.array([
+            [1, 0, 0, 0],
+            [0, 1, 0, 0] ])
+
+
+    def get_VRC_matrix(self,):
+        matrix = get_matrix_RzInv(self.cosTheta, self.sinTheta) @ get_matrix_RyInv(self.cosPhi, self.sinPhi) @ \
+            get_matrix_TrInv(self.e) @ get_matrix_S()
+        return matrix
+
+        # deg = 30
+        # deg_rad = deg*np.pi/180
+        # self.player_sc_dist = WIDTH/2/np.tan(deg_rad)
+
+
+    def to_vrc(self, obj_3d):
+        obj_3d.center_vrc = self.vrc_matrix @ obj_3d.center.vec
+        obj_3d.top_vrc = self.vrc_matrix @ obj_3d.top.vec
+
+        obj_3d.circle_vrc = []
+        for i in range(len(obj_3d.circle_points)):
+            p_vrc = self.vrc_matrix @ obj_3d.circle_points[i].vec
+            obj_3d.circle_vrc.append(p_vrc)
         return True
 
-    def draw(self):
-        self.project_points_to_screen()     #-> list of projected points
-        for i in range(len(self.circle_2d)):
-            drawline_2d(self.circle_2d[i], \
-                     self.circle_2d[(i+1) % len(self.circle_2d)])
-            drawline_2d(self.circle_2d[i], self.top_2d)
-        # for i in range(len(self.circle_points)):
-            # drawline(self.points[i],
-            #          (self.points[(i+1) % len(self.circle_points)]))
-            # drawline(self.points[i], self.top)
 
-    # def draw(self):
-    #     self.project_to_screen()
-    #     for i in range(len(self.circle_points)):
-    #         drawline(self.points[i], (self.points[(i+1) % len(self.circle_points)]))
-    #         # drawline(self.points[i], (self.center))
-    #         drawline(self.points[i], (self.top))
+    def proj_vrc(self, obj_3d):
+        self.to_vrc(obj_3d)
+
+        obj_3d.center_2d = self.proj_matrix @ obj_3d.center.vec + screen_center_vec
+        obj_3d.top_2d = self.proj_matrix @ obj_3d.top.vec + screen_center_vec
+
+        obj_3d.circle_2d = []
+        for i in range(len(obj_3d.circle_points)):
+            p_2d = self.proj_matrix @ obj_3d.circle_points[i].vec + \
+                screen_center_vec
+            obj_3d.circle_2d.append(p_2d)
+
+
+    def draw(self, obj_2d):
+        self.proj_vrc(obj_2d)
+        for i in range(len(obj_2d.circle_2d)):
+            drawline_2d(obj_2d.circle_2d[i], \
+                     obj_2d.circle_2d[(i+1) % len(obj_2d.circle_2d)])
+            drawline_2d(obj_2d.circle_2d[i], obj_2d.top_2d)
+
 
 
 
@@ -334,9 +335,10 @@ if __name__ == '__main__':
 
     # ============= Create object ==================
     w = Wheel(100, height=200, x=0, y=0)
+    cam = Camera(xe=300, ye=300, ze=300)
 
     while True:
-        # clock.tick(1)
+        # clock.tick(30)
         screen.blit(bg, (0,0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -350,6 +352,7 @@ if __name__ == '__main__':
         # update stuff
         # print('transform1\n', w.center.vec == w.top.vec)
         # w.translate(5, 5, 0)
+        cam.draw(w)
         w.rotate_x(0.001)
         w.rotate_y(0.001)
         w.rotate_z(0.001)
@@ -358,7 +361,7 @@ if __name__ == '__main__':
         # w.translate_2_origin()
 
         # print('draw\n',w.center.vec == w.top.vec, '\n\n')
-        w.draw()
+        # w.draw()
 
 
         pygame.display.update()
