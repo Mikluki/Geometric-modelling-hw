@@ -37,8 +37,9 @@ RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 
 scale = 100
-WIDTH, HEIGHT = 1000, 800
+WIDTH, HEIGHT = 1000, 1000
 screen_center = [WIDTH/2, HEIGHT/2]  # x, y
+screen_center_vec = np.array([[screen_center[0]], [screen_center[1]]])
 
 pygame.display.set_caption("3D projection Lab#2")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -101,11 +102,18 @@ def get_matrix_Tr(tx, ty, tz):
     return translation_matrix
 
 # ============= Functions ==================
-def drawline(point1, point2):
+def drawline_3d(point1, point2):
     # tuple1 = (point1.vec[0, 0], point1.vec[1, 0])
     # tuple2 = (point2.vec[0, 0], point2.vec[1, 0])
-    pygame.draw.line(screen, BLACK, (point1.x,
-                        point1.y), (point2.x, point2.y), width = 4)
+    pygame.draw.line(screen, BLACK, (point1.x,point1.y),\
+        (point2.x, point2.y), width = 4)
+
+
+def drawline_2d(point1, point2):
+    # pygame.draw.line(screen, BLACK, (point1.x,point1.y),\
+    #     (point2.x, point2.y), width=4)
+    pygame.draw.line(screen, BLACK, (point1[0,0], point1[1,0]), \
+        (point2[0,0], point2[1,0]), width=4)
 
 
 # ============= Classes ==================
@@ -140,23 +148,23 @@ class Wheel:
         self.center = Point(x, y, z)
         self.top = Point(x, y, height)
 
-        self.cirle_points = []
-        self.cirle_points.append( Point(self.center.x, self.center.y + self.radius, self.center.z ))
-        self.cirle_points.append( Point(self.center.x + self.diag_coef, self.center.y + self.diag_coef,\
+        self.circle_points = []
+        self.circle_points.append( Point(self.center.x, self.center.y + self.radius, self.center.z ))
+        self.circle_points.append( Point(self.center.x + self.diag_coef, self.center.y + self.diag_coef,\
             self.center.z))
-        self.cirle_points.append( Point(self.center.x + self.radius, self.center.y, self.center.z ))
-        self.cirle_points.append( Point(self.center.x + self.diag_coef, self.center.y - self.diag_coef,\
+        self.circle_points.append( Point(self.center.x + self.radius, self.center.y, self.center.z ))
+        self.circle_points.append( Point(self.center.x + self.diag_coef, self.center.y - self.diag_coef,\
             self.center.z))
-        self.cirle_points.append( Point(self.center.x, self.center.y - self.radius, self.center.z ))
-        self.cirle_points.append( Point(self.center.x - self.diag_coef, self.center.y - self.diag_coef,\
+        self.circle_points.append( Point(self.center.x, self.center.y - self.radius, self.center.z ))
+        self.circle_points.append( Point(self.center.x - self.diag_coef, self.center.y - self.diag_coef,\
             self.center.z))
-        self.cirle_points.append( Point(self.center.x - self.radius, self.center.y, self.center.z ))
-        self.cirle_points.append( Point(self.center.x - self.diag_coef, self.center.y + self.diag_coef,\
+        self.circle_points.append( Point(self.center.x - self.radius, self.center.y, self.center.z ))
+        self.circle_points.append( Point(self.center.x - self.diag_coef, self.center.y + self.diag_coef,\
             self.center.z))
 
-        self.points = list(self.cirle_points)
-        self.points.append(self.top)
+        self.points = list(self.circle_points)
         self.points.append(self.center)
+        self.points.append(self.top)
 
     def translate_2_origin(self,):
         cx, cy, cz = self.center.x, self.center.y, self.center.z
@@ -197,19 +205,35 @@ class Wheel:
 
 
 # ====================== Priject and draw ======================
-    def project_to_screen(self):
-        for i in range(len(self.points)):
-            # print(self.points[i].vec, 'mult to\n', projection_matrix, '  n={}\n\n'.format(i))
-            projection2d = projection_matrix @ self.points[i].vec
-        return projection2d
 
+    def project_points_to_screen(self):
+        self.center_2d = projection_matrix @ self.center.vec + screen_center_vec
+        self.top_2d = projection_matrix @ self.top.vec + screen_center_vec
+
+        self.circle_2d = []
+        for i in range(len(self.circle_points)):
+            p_2d = projection_matrix @ self.circle_points[i].vec + \
+                screen_center_vec
+            self.circle_2d.append(p_2d)
+        return True
 
     def draw(self):
-        self.project_to_screen()
-        for i in range(len(self.cirle_points)):
-            drawline(self.points[i], (self.points[(i+1) % len(self.cirle_points)]))
-            # drawline(self.points[i], (self.center))
-            drawline(self.points[i], (self.top))
+        self.project_points_to_screen()     #-> list of projected points
+        for i in range(len(self.circle_2d)):
+            drawline_2d(self.circle_2d[i], \
+                     self.circle_2d[(i+1) % len(self.circle_2d)])
+            drawline_2d(self.circle_2d[i], self.top_2d)
+        # for i in range(len(self.circle_points)):
+            # drawline(self.points[i],
+            #          (self.points[(i+1) % len(self.circle_points)]))
+            # drawline(self.points[i], self.top)
+
+    # def draw(self):
+    #     self.project_to_screen()
+    #     for i in range(len(self.circle_points)):
+    #         drawline(self.points[i], (self.points[(i+1) % len(self.circle_points)]))
+    #         # drawline(self.points[i], (self.center))
+    #         drawline(self.points[i], (self.top))
 
 
 
@@ -240,10 +264,10 @@ if __name__ == '__main__':
     screen.blit(bg, (0,0))
 
     # ============= Create object ==================
-    w = Wheel(100, height=200, x=screen_center[0], y=screen_center[1])
+    w = Wheel(100, height=200, x=0, y=0)
 
     while True:
-        # clock.tick(5)
+        # clock.tick(1)
         screen.blit(bg, (0,0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
