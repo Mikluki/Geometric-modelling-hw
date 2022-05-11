@@ -1,8 +1,8 @@
 # ============= Imports ==================
 from re import X
 import pygame
-import numpy as np
 from pynput import keyboard  # using module keyboard
+import numpy as np
 # from math import *
 
 direction = 0
