@@ -3,34 +3,6 @@ from re import X
 import pygame
 import numpy as np
 from pynput import keyboard  # using module keyboard
-# from math import *
-
-direction = 0
-
-def on_press(key):
-    global direction
-    try:
-        print('alphanumeric key {0} pressed'.format(
-            key.char))
-        if key.char == "a":
-            direction = 0
-        elif key.char == "d":
-            direction = 1
-        elif key.char == "w":
-            direction = 2
-        elif key.char == "s":
-            direction = 3
-    except AttributeError:
-        print('special key {0} pressed'.format(
-            key))
-
-def on_release(key):
-    print('{0} released'.format(
-        key))
-    if key == keyboard.Key.esc:
-        # Stop listener
-        return False
-
 
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -176,9 +148,24 @@ class Point():
         return True
 
 # print(Rz(np.pi/2)@a.vec)
-class Wheel:
-    def __init__(self, radius, height=0, x=0, y=0, z=0, color='black'):
 
+
+class Basis:
+    def __init__(self,  x=0, y=0, z=0, color='red'):
+        self.dd = 100
+        self.points = []
+        self.center = Point(x,y,z)
+        self.points.append(Point(self.center.x + self.dd, y, z))
+        self.points.append(self.center)
+        self.points.append(Point(x,self.center.y + self.dd,z))
+        self.points.append(self.center)
+        self.points.append(Point(x,y,self.center.z + self.dd))
+
+
+
+class Wheel:
+    def __init__(self, radius, n=10, height=0, x=0, y=0, z=0, color='black'):
+        self.n = n
         self.radius = radius
         self.height = height
 
@@ -188,23 +175,21 @@ class Wheel:
         self.center = Point(x, y, z)
         self.top = Point(x, y, height)
 
-        self.circle_points = []
-        self.circle_points.append( Point(self.center.x, self.center.y + self.radius, self.center.z ))
-        self.circle_points.append( Point(self.center.x + self.diag_coef, self.center.y + self.diag_coef,\
-            self.center.z))
-        self.circle_points.append( Point(self.center.x + self.radius, self.center.y, self.center.z ))
-        self.circle_points.append( Point(self.center.x + self.diag_coef, self.center.y - self.diag_coef,\
-            self.center.z))
-        self.circle_points.append( Point(self.center.x, self.center.y - self.radius, self.center.z ))
-        self.circle_points.append( Point(self.center.x - self.diag_coef, self.center.y - self.diag_coef,\
-            self.center.z))
-        self.circle_points.append( Point(self.center.x - self.radius, self.center.y, self.center.z ))
-        self.circle_points.append( Point(self.center.x - self.diag_coef, self.center.y + self.diag_coef,\
-            self.center.z))
-
-        self.points = list(self.circle_points)
-        # self.points.append(self.center)
+        self.points = self.get_circle_P()
         self.points.append(self.top)
+
+
+    def get_circle_P(self,):
+        unit_angle = 2*np.pi/self.n
+        angle = 0
+        points = []
+        for i in range(self.n):
+            dx = self.radius*np.cos(angle)
+            dy = self.radius*np.sin(angle)
+            points.append(Point(dx,dy,self.center.z))
+
+            angle = angle + unit_angle
+        return points
 
     def translate_2_origin(self,):
         cx, cy, cz = self.center.x, self.center.y, self.center.z
@@ -283,8 +268,6 @@ class Camera:
 
 
     def to_vrc(self, fig):
-
-        # print(fig.top_vrc,'\n---\n', fig.top.vec,'\n\n')
         fig.list_p_vrc = []
         for i in range(len(fig.points)):
             p_vrc = self.vrc_matrix @ fig.points[i].vec
@@ -322,14 +305,6 @@ if __name__ == '__main__':
     '''Main method'''
 
 
-    # # Keyboard:
-    # # Collect events until released
-    # listener = keyboard.Listener(
-    #     on_press=on_press,
-    #     on_release=on_release)
-    # listener.start()
-
-    FPS = 30
 
     translation = (0.00,0)
     rotation = 0.001
@@ -340,13 +315,13 @@ if __name__ == '__main__':
     bg.fill((255, 255, 255))
     bg.convert()
     clock = pygame.time.Clock()
-    milliseconds = clock.tick(FPS)
     screen.fill(WHITE)
     screen.blit(bg, (0,0))
 
     # ============= Create object ==================
     w = Wheel(100, height=200, x=0, y=0)
-    cam = Camera(xe=300, ye=200, ze=200, distance=300)
+    b = Basis()
+    cam = Camera(xe=200, ye=200, ze=200, distance=200)
 
     while True:
         # clock.tick(5)
@@ -367,6 +342,8 @@ if __name__ == '__main__':
         # w.translate(0, 0, 0.05)
 
         cam.draw(w)
+        # cam.draw(b)
+
         w.rotate_x(0.001)
         w.rotate_y(0.001)
         # w.rotate_z(0.001)
