@@ -45,24 +45,7 @@ pygame.display.set_caption("3D projection Lab#2")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
-
-points = []
-p1 = np.array([-1, -1, 1])
-p2 = np.array([1, -1, 1])
-
 # ============= Matrices ==================
-
-# matrix = np.array([
-#     [1, 0, 0],
-#     [0, 1, 0],
-#     [0, 0, 1]])
-
-projection_matrix = np.array([
-    [1, 0, 0, 0],
-    [0, 1, 0, 0]
-])
-
-
 def get_matrix_Rx(angle):
     rx = np.array([
         [1,             0,              0, 0],
@@ -100,6 +83,92 @@ def get_matrix_Tr(tx, ty, tz):
         [0, 0, 1, tz],
         [0, 0, 0, 1]])
     return translation_matrix
+
+
+# ============= Matruces INVERSE ==================
+def get_matrix_RzInv(cos,sin):
+    rz = np.array([
+        [cos,  sin, 0, 0],
+        [-sin, cos, 0, 0],
+        [0,      0, 1, 0],
+        [0,      0, 0, 1]])
+    return rz
+
+
+def get_matrix_RxInv(cos,sin):
+    rx = np.array([
+        [1,    0,   0, 0],
+        [0,  cos, sin, 0],
+        [0, -sin, cos, 0],
+        [0,    0,   0, 1]])
+    return rx
+
+
+def get_matrix_RyInv(cos,sin):
+    ry = np.array([
+        [cos, 0, -sin, 0],
+        [0,   1,    0, 0],
+        [sin, 0,  cos, 0],
+        [0,   0,    0, 1]])
+    return ry
+
+
+def get_matrix_TrInv(e, ty=0, tz=0):
+    translation_matrix = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [-e, -ty, -tz, 1]])
+    return translation_matrix
+
+
+def get_matrix_Scale(Sx, Sy, Sz):
+    Scale_matrix = np.array([
+        [Sx, 0, 0, 0],
+        [0, Sy, 0, 0],
+        [0, 0, Sz, 0],
+        [0, 0, 0, 1]])
+    return Scale_matrix
+
+
+def get_matrix_S():
+    Scale_matrix = np.array([
+        [ 0, 1, 0, 0],
+        [ 0, 0, 1, 0],
+        [-1, 0, 0, 0],
+        [ 0, 0, 0, 1]])
+    return Scale_matrix
+
+
+
+class Camera:
+    def __init__(self, xe=100, ye=100, ze=100, distance = 150):
+        self.pos = (xe,ye,ze)
+        self.v = np.sqrt(xe**2 + ye**2)
+        self.e = np.zqrt(xe**2 + ye**2 + ze**2)
+        self.cosTheta = xe/self.v
+        self.sinTheta = ye/self.v
+        self.cosPhi = ze/self.e
+        self.sinPhi = self.v/self.e
+
+        self.VRC_matrix = self.get_VRC_matrix()
+
+        self.dist = distance
+        self.proj_matrix = np.array([
+            [1, 0, 0, 0],
+            [0, 1, 0, 0]
+        ])
+
+
+    def get_VRC_matrix(self,):
+        matrix = get_matrix_RzInv(self.cosTheta, self.sinTheta) @ get_matrix_RyInv(self.cosPhi, self.sinPhi) @ \
+            get_matrix_TrInv(self.e) @ get_matrix_S()
+        return matrix
+
+        # deg = 30
+        # deg_rad = deg*np.pi/180
+        # self.player_sc_dist = WIDTH/2/np.tan(deg_rad)
+
 
 # ============= Functions ==================
 def drawline_3d(point1, point2):
