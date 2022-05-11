@@ -262,6 +262,16 @@ class Camera:
             [1, 0, 0, 0],
             [0, 1, 0, 0] ])
 
+    def get_proj_mx(self,vec):
+        z = vec[2,0]
+        print(vec, ' = vec\n', z, ' = z\n')
+        # return np.array([
+        #     [self.dist/z, 0, 0, 0],
+        #     [0, self.dist/z, 0, 0]])
+
+        return np.array([
+            [1, 0, 0, 0],
+            [0, 1, 0, 0]])
 
     def get_VRC_matrix(self,):
         matrix = get_matrix_RzInv(self.cosTheta, self.sinTheta) @ get_matrix_RyInv(self.cosPhi, self.sinPhi) @ \
@@ -277,6 +287,7 @@ class Camera:
         obj_3d.center_vrc = self.vrc_matrix @ obj_3d.center.vec
         obj_3d.top_vrc = self.vrc_matrix @ obj_3d.top.vec
 
+        # print(obj_3d.top_vrc,'\n---\n', obj_3d.top.vec,'\n\n')
         obj_3d.circle_vrc = []
         for i in range(len(obj_3d.circle_points)):
             p_vrc = self.vrc_matrix @ obj_3d.circle_points[i].vec
@@ -284,25 +295,29 @@ class Camera:
         return True
 
 
-    def proj_vrc(self, obj_3d):
-        self.to_vrc(obj_3d)
+    def proj_vrc(self, vrc):
+        self.to_vrc(vrc)
 
-        obj_3d.center_2d = self.proj_matrix @ obj_3d.center.vec + screen_center_vec
-        obj_3d.top_2d = self.proj_matrix @ obj_3d.top.vec + screen_center_vec
-
-        obj_3d.circle_2d = []
-        for i in range(len(obj_3d.circle_points)):
-            p_2d = self.proj_matrix @ obj_3d.circle_points[i].vec + \
+        # vrc.center_2d = self.get_proj_mx(vrc.center_vrc) @ vrc.center_vrc + screen_center_vec
+        vrc.top_2d = self.get_proj_mx(vrc.top_vrc) @ vrc.top_vrc + screen_center_vec
+        # print(vrc.top.x, '\n', vrc.top.y, '\n', vrc.top.z, '\n---\n', vrc.top, '\n\n')
+        vrc.circle_2d = []
+        for i in range(len(vrc.circle_vrc)):
+            p_2d = self.get_proj_mx(vrc.circle_vrc[i]) @ vrc.circle_vrc[i] + \
                 screen_center_vec
-            obj_3d.circle_2d.append(p_2d)
+            vrc.circle_2d.append(p_2d)
 
 
     def draw(self, obj_2d):
         self.proj_vrc(obj_2d)
         for i in range(len(obj_2d.circle_2d)):
+            print(i,'\n')
+            print(obj_2d.circle_2d[i],'\n----')
+            # obj_2d.circle_2d[(i+1) % len(obj_2d.circle_2d)], '\n\n')
+
             drawline_2d(obj_2d.circle_2d[i], \
                      obj_2d.circle_2d[(i+1) % len(obj_2d.circle_2d)])
-            drawline_2d(obj_2d.circle_2d[i], obj_2d.top_2d)
+            # drawline_2d(obj_2d.circle_2d[i], obj_2d.top_2d)
 
 
 
@@ -335,10 +350,10 @@ if __name__ == '__main__':
 
     # ============= Create object ==================
     w = Wheel(100, height=200, x=0, y=0)
-    cam = Camera(xe=300, ye=300, ze=300)
+    cam = Camera(xe=300, ye=300, ze=300, distance=10)
 
     while True:
-        # clock.tick(30)
+        clock.tick(30)
         screen.blit(bg, (0,0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
