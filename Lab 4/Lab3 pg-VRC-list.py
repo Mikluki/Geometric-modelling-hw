@@ -1,5 +1,5 @@
 # ============= Imports ==================
-from re import X
+from re import M, X
 import pygame
 import numpy as np
 from pynput import keyboard  # using module keyboard
@@ -114,11 +114,11 @@ def get_matrix_S():
 
 
 # ============= Functions ==================
-def drawline_3d(point1, point2):
-    # tuple1 = (point1.vec[0, 0], point1.vec[1, 0])
-    # tuple2 = (point2.vec[0, 0], point2.vec[1, 0])
-    pygame.draw.line(screen, BLACK, (point1.x,point1.y),\
-        (point2.x, point2.y), width = 4)
+# def drawline_3d(point1, point2):
+#     # tuple1 = (point1.vec[0, 0], point1.vec[1, 0])
+#     # tuple2 = (point2.vec[0, 0], point2.vec[1, 0])
+#     pygame.draw.line(screen, BLACK, (point1.x,point1.y),\
+#         (point2.x, point2.y), width = 4)
 
 
 def drawline_2d(point1, point2):
@@ -127,6 +127,9 @@ def drawline_2d(point1, point2):
     pygame.draw.line(screen, BLACK, (point1[0,0], point1[1,0]), \
         (point2[0,0], point2[1,0]), width=4)
 
+
+def drawpolygon(p1, p2, p3):
+    pygame.draw.polygon(screen, BLACK,[(p1[0,0],p1[1,0]),(p2[0,0],p2[1,0]),(p3[0,0],p3[1,0])])
 
 # ============= Classes ==================
 class Point():
@@ -290,12 +293,14 @@ class Camera:
 
     def draw(self, fig):
         self.proj_vrc(fig)
+        n_points = len(fig.list_p_proj)-1
         for i in range(len(fig.list_p_proj)):
             # print(i,'\n')
             # print(fig.list_p_proj[i],'\n----')
-            n_points = len(fig.list_p_proj)-1
             drawline_2d(fig.list_p_proj[i], fig.list_p_proj[(i+1) % n_points])
             drawline_2d(fig.list_p_proj[i], fig.list_p_proj[-1])
+        for i in range(int(len(fig.list_p_proj))):
+            drawpolygon(fig.list_p_proj[i], fig.list_p_proj[(i+1)%n_points], fig.list_p_proj[-1])
         return True
 
 
@@ -338,22 +343,26 @@ if __name__ == '__main__':
         # update stuff
         # print('transform1\n', w.center.vec == w.top.vec)
         # w.translate(0.05, 0, 0)
-        w.translate(0, 0.05, 0)
+        # w.translate(0, 0.05, 0)
         # w.translate(0, 0, 0.05)
 
         cam.draw(w)
         # cam.draw(b)
 
-        # w.rotate_x(0.001)
-        # w.rotate_y(0.001)
-        w.rotate_z(0.001)
+        w.rotate_x(0.001)
+        w.rotate_y(0.001)
+        # w.rotate_z(0.001)
 
         # print('transform2\n', w.center.vec == w.top.vec)
         # w.translate_2_origin()
 
         # print('draw\n',w.center.vec == w.top.vec, '\n\n')
-        # w.draw()
+        # w.draw()z
 
 
         pygame.display.update()
 
+        # p1 = np.array([[50], [50]])
+        # p2 = np.array([[80], [80]])
+        # p3 = np.array([[50], [80]])
+        # drawpolygon(p1,p2,p3)
