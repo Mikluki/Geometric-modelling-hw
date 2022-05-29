@@ -1,0 +1,4 @@
+let r = 5,
+    value = r - Math.sqrt(X*X + Y*Y + Z*Z);
+
+return value;

@@ -1,0 +1,20 @@
+let amp = 0.41,
+    freq = 0.2, //SLIDER;0;30;0.1
+    phase = 0, //SLIDER;0;15;0.1
+    a2x = freq * X,
+    a2y = freq * Y,
+    a2z = freq * Z,
+    sx = Math.sin(a2x),
+    sy = Math.sin(a2y),
+    sz = Math.sin(a2z),
+    a1d = amp / 1.17,
+    sx2 = a1d * Math.sin(a2x/1.35 + phase * sz),
+    sy2 = a1d * Math.sin(a2y/1.35 + phase * sx),
+    sz2 = a1d * Math.sin(a2z/1.35 + phase * sy),
+    Serx = amp * sx + sx2,
+    Sery = amp * sy + sy2,
+    Serz = amp * sz + sz2,
+    SS = Serx*Sery*Serz,
+    r = 0.6, //SLIDER;0.1;2;0.01
+    value = SS + 1/r*(r*r - X*X- Y*Y - Z*Z);
+return value*0.3;
